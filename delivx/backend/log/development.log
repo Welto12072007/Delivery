@@ -1,0 +1,505 @@
+  [1m[35m (1.3ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" varchar NOT NULL PRIMARY KEY)[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" varchar NOT NULL PRIMARY KEY, "value" varchar, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL)[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.2ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = ? ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "environment"]]
+  [1m[36mActiveRecord::InternalMetadata Create (0.3ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('environment', 'development', '2025-08-06 23:11:33.933761', '2025-08-06 23:11:33.933765') RETURNING "key"[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Migrating to CreateUsers (20250806000001)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (2.0ms)[0m  [1m[35mCREATE TABLE "users" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "email" varchar NOT NULL, "password_digest" varchar NOT NULL, "phone" varchar NOT NULL, "address" varchar, "city" varchar, "state" varchar, "zip_code" varchar, "role" integer DEFAULT 0, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_users_on_email" ON "users" ("email")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20250806000001') RETURNING "version"[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mcommit transaction[0m
+Migrating to CreateCategories (20250806000002)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (2.4ms)[0m  [1m[35mCREATE TABLE "categories" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "description" text, "active" boolean DEFAULT 1, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_categories_on_name" ON "categories" ("name")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20250806000002') RETURNING "version"[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+Migrating to CreateRestaurants (20250806000003)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (2.9ms)[0m  [1m[35mCREATE TABLE "restaurants" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "user_id" integer NOT NULL, "name" varchar NOT NULL, "description" text NOT NULL, "address" varchar NOT NULL, "city" varchar NOT NULL, "state" varchar NOT NULL, "zip_code" varchar NOT NULL, "phone" varchar NOT NULL, "delivery_time" varchar NOT NULL, "delivery_fee" decimal(8,2) NOT NULL, "minimum_order" decimal(8,2) NOT NULL, "rating" decimal(3,2) DEFAULT 0.0, "active" boolean DEFAULT 1, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_aef57e41ec"
+FOREIGN KEY ("user_id")
+  REFERENCES "users" ("id")
+)[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_restaurants_on_user_id" ON "restaurants" ("user_id")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.4ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20250806000003') RETURNING "version"[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+Migrating to CreateFoods (20250806000004)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (2.7ms)[0m  [1m[35mCREATE TABLE "foods" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "restaurant_id" integer NOT NULL, "category_id" integer NOT NULL, "name" varchar NOT NULL, "description" text NOT NULL, "price" decimal(8,2) NOT NULL, "available" boolean DEFAULT 1, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_eae1e5c8ad"
+FOREIGN KEY ("restaurant_id")
+  REFERENCES "restaurants" ("id")
+, CONSTRAINT "fk_rails_7711617f3c"
+FOREIGN KEY ("category_id")
+  REFERENCES "categories" ("id")
+)[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_foods_on_restaurant_id" ON "foods" ("restaurant_id")[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_foods_on_category_id" ON "foods" ("category_id")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20250806000004') RETURNING "version"[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+Migrating to CreateOrders (20250806000005)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (3.3ms)[0m  [1m[35mCREATE TABLE "orders" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "user_id" integer NOT NULL, "restaurant_id" integer NOT NULL, "total_amount" decimal(8,2) NOT NULL, "delivery_address" varchar NOT NULL, "status" integer DEFAULT 0, "rating" integer, "observation" text, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_f868b47f6a"
+FOREIGN KEY ("user_id")
+  REFERENCES "users" ("id")
+, CONSTRAINT "fk_rails_9af093cac8"
+FOREIGN KEY ("restaurant_id")
+  REFERENCES "restaurants" ("id")
+)[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_orders_on_user_id" ON "orders" ("user_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE INDEX "index_orders_on_restaurant_id" ON "orders" ("restaurant_id")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20250806000005') RETURNING "version"[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mcommit transaction[0m
+Migrating to CreateOrderItems (20250806000006)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (4.0ms)[0m  [1m[35mCREATE TABLE "order_items" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "order_id" integer NOT NULL, "food_id" integer NOT NULL, "quantity" integer NOT NULL, "unit_price" decimal(8,2) NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_e3cb28f071"
+FOREIGN KEY ("order_id")
+  REFERENCES "orders" ("id")
+, CONSTRAINT "fk_rails_0eb6a555b3"
+FOREIGN KEY ("food_id")
+  REFERENCES "foods" ("id")
+)[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_order_items_on_order_id" ON "order_items" ("order_id")[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_order_items_on_food_id" ON "order_items" ("food_id")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20250806000006') RETURNING "version"[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+Migrating to CreateRestaurantCategories (20250806000007)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (2.2ms)[0m  [1m[35mCREATE TABLE "restaurant_categories" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "restaurant_id" integer NOT NULL, "category_id" integer NOT NULL, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_a85f856c42"
+FOREIGN KEY ("restaurant_id")
+  REFERENCES "restaurants" ("id")
+, CONSTRAINT "fk_rails_8f11eebc1c"
+FOREIGN KEY ("category_id")
+  REFERENCES "categories" ("id")
+)[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_restaurant_categories_on_restaurant_id" ON "restaurant_categories" ("restaurant_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE INDEX "index_restaurant_categories_on_category_id" ON "restaurant_categories" ("category_id")[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_restaurant_categories_on_restaurant_id_and_category_id" ON "restaurant_categories" ("restaurant_id", "category_id")[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20250806000007') RETURNING "version"[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+Migrating to CreateActiveStorageTables (20250806000008)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (2.4ms)[0m  [1m[35mDROP TABLE IF EXISTS "active_storage_attachments"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TABLE "active_storage_attachments" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "record_type" varchar NOT NULL, "record_id" bigint NOT NULL, "blob_id" bigint NOT NULL, "created_at" datetime(6) NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE INDEX "index_active_storage_attachments_on_blob_id" ON "active_storage_attachments" ("blob_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_attachments_uniqueness" ON "active_storage_attachments" ("record_type", "record_id", "name", "blob_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "active_storage_blobs"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TABLE "active_storage_blobs" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "key" varchar NOT NULL, "filename" varchar NOT NULL, "content_type" varchar, "metadata" text, "service_name" varchar NOT NULL, "byte_size" bigint NOT NULL, "checksum" varchar, "created_at" datetime(6) NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_blobs_on_key" ON "active_storage_blobs" ("key")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "active_storage_variant_records"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TABLE "active_storage_variant_records" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "blob_id" bigint NOT NULL, "variation_digest" varchar NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_variant_records_uniqueness" ON "active_storage_variant_records" ("blob_id", "variation_digest")[0m
+  [1m[35m (0.0ms)[0m  [1m[35mPRAGMA foreign_keys[0m
+  [1m[35m (0.1ms)[0m  [1m[35mPRAGMA defer_foreign_keys[0m
+  [1m[35m (0.1ms)[0m  [1m[35mPRAGMA defer_foreign_keys = ON[0m
+  [1m[35m (0.1ms)[0m  [1m[35mPRAGMA foreign_keys = OFF[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TEMPORARY TABLE "aactive_storage_attachments" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "record_type" varchar NOT NULL, "record_id" bigint NOT NULL, "blob_id" bigint NOT NULL, "created_at" datetime(6) NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE UNIQUE INDEX "tindex_aactive_storage_attachments_uniqueness" ON "aactive_storage_attachments" ("record_type", "record_id", "name", "blob_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE INDEX "tindex_aactive_storage_attachments_on_blob_id" ON "aactive_storage_attachments" ("blob_id")[0m
+  [1m[35m (0.2ms)[0m  [1m[32mINSERT INTO "aactive_storage_attachments" ("id","name","record_type","record_id","blob_id","created_at")
+                     SELECT "id","name","record_type","record_id","blob_id","created_at" FROM "active_storage_attachments"[0m
+  [1m[35m (0.3ms)[0m  [1m[35mDROP TABLE "active_storage_attachments"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TABLE "active_storage_attachments" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "record_type" varchar NOT NULL, "record_id" bigint NOT NULL, "blob_id" bigint NOT NULL, "created_at" datetime(6) NOT NULL, CONSTRAINT "fk_rails_c3b3935057"
+FOREIGN KEY ("blob_id")
+  REFERENCES "active_storage_blobs" ("id")
+)[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_active_storage_attachments_on_blob_id" ON "active_storage_attachments" ("blob_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_attachments_uniqueness" ON "active_storage_attachments" ("record_type", "record_id", "name", "blob_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "active_storage_attachments" ("id","name","record_type","record_id","blob_id","created_at")
+                     SELECT "id","name","record_type","record_id","blob_id","created_at" FROM "aactive_storage_attachments"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE "aactive_storage_attachments"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mPRAGMA defer_foreign_keys = 0[0m
+  [1m[35m (0.1ms)[0m  [1m[35mPRAGMA foreign_keys = 1[0m
+  [1m[35m (0.0ms)[0m  [1m[35mPRAGMA foreign_keys[0m
+  [1m[35m (0.1ms)[0m  [1m[35mPRAGMA defer_foreign_keys[0m
+  [1m[35m (0.0ms)[0m  [1m[35mPRAGMA defer_foreign_keys = ON[0m
+  [1m[35m (0.0ms)[0m  [1m[35mPRAGMA foreign_keys = OFF[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TEMPORARY TABLE "aactive_storage_variant_records" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "blob_id" bigint NOT NULL, "variation_digest" varchar NOT NULL)[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE UNIQUE INDEX "tindex_aactive_storage_variant_records_uniqueness" ON "aactive_storage_variant_records" ("blob_id", "variation_digest")[0m
+  [1m[35m (0.0ms)[0m  [1m[32mINSERT INTO "aactive_storage_variant_records" ("id","blob_id","variation_digest")
+                     SELECT "id","blob_id","variation_digest" FROM "active_storage_variant_records"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE "active_storage_variant_records"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TABLE "active_storage_variant_records" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "blob_id" bigint NOT NULL, "variation_digest" varchar NOT NULL, CONSTRAINT "fk_rails_993965df05"
+FOREIGN KEY ("blob_id")
+  REFERENCES "active_storage_blobs" ("id")
+)[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_active_storage_variant_records_uniqueness" ON "active_storage_variant_records" ("blob_id", "variation_digest")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "active_storage_variant_records" ("id","blob_id","variation_digest")
+                     SELECT "id","blob_id","variation_digest" FROM "aactive_storage_variant_records"[0m
+  [1m[35m (1.1ms)[0m  [1m[35mDROP TABLE "aactive_storage_variant_records"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mPRAGMA defer_foreign_keys = 0[0m
+  [1m[35m (0.0ms)[0m  [1m[35mPRAGMA foreign_keys = 1[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20250806000008') RETURNING "version"[0m
+  [1m[36mTRANSACTION (0.5ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mOrderItem Load (0.2ms)[0m  [1m[34mSELECT "order_items".* FROM "order_items"[0m
+DEPRECATION WARNING: Defining enums with keyword arguments is deprecated and will be removed
+in Rails 8.0. Positional arguments should be used instead:
+
+enum :status, {pending: 0, confirmed: 1, preparing: 2, ready: 3, delivering: 4, delivered: 5, cancelled: 6}
+ (called from <class:Order> at C:/Delivery/delivx/backend/app/models/order.rb:10)
+  [1m[36mOrder Load (0.2ms)[0m  [1m[34mSELECT "orders".* FROM "orders"[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mOrderItem Load (0.2ms)[0m  [1m[34mSELECT "order_items".* FROM "order_items"[0m
+DEPRECATION WARNING: Defining enums with keyword arguments is deprecated and will be removed
+in Rails 8.0. Positional arguments should be used instead:
+
+enum :status, {pending: 0, confirmed: 1, preparing: 2, ready: 3, delivering: 4, delivered: 5, cancelled: 6}
+ (called from <class:Order> at C:/Delivery/delivx/backend/app/models/order.rb:10)
+  [1m[36mOrder Load (0.1ms)[0m  [1m[34mSELECT "orders".* FROM "orders"[0m
+  [1m[36mFood Load (0.1ms)[0m  [1m[34mSELECT "foods".* FROM "foods"[0m
+  [1m[36mRestaurantCategory Load (0.1ms)[0m  [1m[34mSELECT "restaurant_categories".* FROM "restaurant_categories"[0m
+  [1m[36mRestaurant Load (0.2ms)[0m  [1m[34mSELECT "restaurants".* FROM "restaurants"[0m
+  [1m[36mCategory Load (0.2ms)[0m  [1m[34mSELECT "categories".* FROM "categories"[0m
+DEPRECATION WARNING: Defining enums with keyword arguments is deprecated and will be removed
+in Rails 8.0. Positional arguments should be used instead:
+
+enum :role, {customer: 0, restaurant_owner: 1, admin: 2}
+ (called from <class:User> at C:/Delivery/delivx/backend/app/models/user.rb:11)
+  [1m[36mUser Load (0.2ms)[0m  [1m[34mSELECT "users".* FROM "users"[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mCategory Exists? (3.0ms)[0m  [1m[34mSELECT 1 AS one FROM "categories" WHERE "categories"."name" = ? LIMIT ?[0m  [["name", "Hamburguers"], ["LIMIT", 1]]
+  [1m[36mCategory Create (0.3ms)[0m  [1m[32mINSERT INTO "categories" ("name", "description", "active", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?) RETURNING "id"[0m  [["name", "Hamburguers"], ["description", "Deliciosos hamburguers artesanais"], ["active", 1], ["created_at", "2025-08-06 23:12:39.976128"], ["updated_at", "2025-08-06 23:12:39.976128"]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mCategory Exists? (3.9ms)[0m  [1m[34mSELECT 1 AS one FROM "categories" WHERE "categories"."name" = ? LIMIT ?[0m  [["name", "Pizza"], ["LIMIT", 1]]
+  [1m[36mCategory Create (0.3ms)[0m  [1m[32mINSERT INTO "categories" ("name", "description", "active", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?) RETURNING "id"[0m  [["name", "Pizza"], ["description", "Pizzas tradicionais e especiais"], ["active", 1], ["created_at", "2025-08-06 23:12:39.988669"], ["updated_at", "2025-08-06 23:12:39.988669"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mCategory Exists? (2.9ms)[0m  [1m[34mSELECT 1 AS one FROM "categories" WHERE "categories"."name" = ? LIMIT ?[0m  [["name", "Comida Brasileira"], ["LIMIT", 1]]
+  [1m[36mCategory Create (0.3ms)[0m  [1m[32mINSERT INTO "categories" ("name", "description", "active", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?) RETURNING "id"[0m  [["name", "Comida Brasileira"], ["description", "Pratos típicos da culinária brasileira"], ["active", 1], ["created_at", "2025-08-06 23:12:39.999699"], ["updated_at", "2025-08-06 23:12:39.999699"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mCategory Exists? (2.4ms)[0m  [1m[34mSELECT 1 AS one FROM "categories" WHERE "categories"."name" = ? LIMIT ?[0m  [["name", "Japonesa"], ["LIMIT", 1]]
+  [1m[36mCategory Create (0.3ms)[0m  [1m[32mINSERT INTO "categories" ("name", "description", "active", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?) RETURNING "id"[0m  [["name", "Japonesa"], ["description", "Sushi, sashimi e pratos japoneses"], ["active", 1], ["created_at", "2025-08-06 23:12:40.025882"], ["updated_at", "2025-08-06 23:12:40.025882"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mCategory Exists? (3.0ms)[0m  [1m[34mSELECT 1 AS one FROM "categories" WHERE "categories"."name" = ? LIMIT ?[0m  [["name", "Italiana"], ["LIMIT", 1]]
+  [1m[36mCategory Create (0.2ms)[0m  [1m[32mINSERT INTO "categories" ("name", "description", "active", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?) RETURNING "id"[0m  [["name", "Italiana"], ["description", "Massas, risotos e pratos italianos"], ["active", 1], ["created_at", "2025-08-06 23:12:40.037345"], ["updated_at", "2025-08-06 23:12:40.037345"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mCategory Exists? (3.2ms)[0m  [1m[34mSELECT 1 AS one FROM "categories" WHERE "categories"."name" = ? LIMIT ?[0m  [["name", "Mexicana"], ["LIMIT", 1]]
+  [1m[36mCategory Create (0.2ms)[0m  [1m[32mINSERT INTO "categories" ("name", "description", "active", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?) RETURNING "id"[0m  [["name", "Mexicana"], ["description", "Tacos, burritos e comida mexicana"], ["active", 1], ["created_at", "2025-08-06 23:12:40.047440"], ["updated_at", "2025-08-06 23:12:40.047440"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mCategory Exists? (2.9ms)[0m  [1m[34mSELECT 1 AS one FROM "categories" WHERE "categories"."name" = ? LIMIT ?[0m  [["name", "Sobremesas"], ["LIMIT", 1]]
+  [1m[36mCategory Create (0.2ms)[0m  [1m[32mINSERT INTO "categories" ("name", "description", "active", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?) RETURNING "id"[0m  [["name", "Sobremesas"], ["description", "Doces, bolos e sobremesas"], ["active", 1], ["created_at", "2025-08-06 23:12:40.057388"], ["updated_at", "2025-08-06 23:12:40.057388"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mCategory Exists? (2.3ms)[0m  [1m[34mSELECT 1 AS one FROM "categories" WHERE "categories"."name" = ? LIMIT ?[0m  [["name", "Bebidas"], ["LIMIT", 1]]
+  [1m[36mCategory Create (0.2ms)[0m  [1m[32mINSERT INTO "categories" ("name", "description", "active", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?) RETURNING "id"[0m  [["name", "Bebidas"], ["description", "Refrigerantes, sucos e bebidas"], ["active", 1], ["created_at", "2025-08-06 23:12:40.067295"], ["updated_at", "2025-08-06 23:12:40.067295"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mUser Exists? (5.8ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = ? LIMIT ?[0m  [["email", "admin@delivx.com"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("name", "email", "password_digest", "phone", "address", "city", "state", "zip_code", "role", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["name", "Administrador DelivX"], ["email", "admin@delivx.com"], ["password_digest", "$2a$12$YcHqlzIwCAPFSNIF06V.QezxlovB3xS4tqtw38eHGKhVa3dEs2KKe"], ["phone", "(51) 99999-9999"], ["address", "Rua Principal, 123"], ["city", "Taquara"], ["state", "RS"], ["zip_code", "95600-000"], ["role", 2], ["created_at", "2025-08-06 23:12:40.296184"], ["updated_at", "2025-08-06 23:12:40.296184"]]
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mUser Exists? (5.8ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = ? LIMIT ?[0m  [["email", "joao@burgerhouse.com"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("name", "email", "password_digest", "phone", "address", "city", "state", "zip_code", "role", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["name", "João Silva"], ["email", "joao@burgerhouse.com"], ["password_digest", "$2a$12$q/nPIH.Sr1rZGvmHY/S1weD3ci/P/TveMCDc76yE2zo8PODLOFufq"], ["phone", "(51) 98888-8888"], ["address", "Av. dos Hamburguers, 456"], ["city", "Taquara"], ["state", "RS"], ["zip_code", "95600-001"], ["role", 1], ["created_at", "2025-08-06 23:12:40.497915"], ["updated_at", "2025-08-06 23:12:40.497915"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mUser Exists? (2.7ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = ? LIMIT ?[0m  [["email", "maria@pizzaria.com"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("name", "email", "password_digest", "phone", "address", "city", "state", "zip_code", "role", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["name", "Maria Santos"], ["email", "maria@pizzaria.com"], ["password_digest", "$2a$12$4JaNGVTeRgaSMNoEWxxByOrlGW8vPB6X0x82XzZyHC4D4f5HOmtDC"], ["phone", "(51) 97777-7777"], ["address", "Rua das Pizzas, 789"], ["city", "Taquara"], ["state", "RS"], ["zip_code", "95600-002"], ["role", 1], ["created_at", "2025-08-06 23:12:40.695399"], ["updated_at", "2025-08-06 23:12:40.695399"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mUser Exists? (4.3ms)[0m  [1m[34mSELECT 1 AS one FROM "users" WHERE "users"."email" = ? LIMIT ?[0m  [["email", "carlos@email.com"], ["LIMIT", 1]]
+  [1m[36mUser Create (0.2ms)[0m  [1m[32mINSERT INTO "users" ("name", "email", "password_digest", "phone", "address", "city", "state", "zip_code", "role", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["name", "Carlos Cliente"], ["email", "carlos@email.com"], ["password_digest", "$2a$12$nLuV34Uq7MDHFOB/dgH7bep0HwJRxRTp21oLHw/fLyCPgpov0rGoi"], ["phone", "(51) 96666-6666"], ["address", "Rua dos Clientes, 321"], ["city", "Taquara"], ["state", "RS"], ["zip_code", "95600-003"], ["role", 0], ["created_at", "2025-08-06 23:12:40.896444"], ["updated_at", "2025-08-06 23:12:40.896444"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mRestaurant Create (4.0ms)[0m  [1m[32mINSERT INTO "restaurants" ("user_id", "name", "description", "address", "city", "state", "zip_code", "phone", "delivery_time", "delivery_fee", "minimum_order", "rating", "active", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["user_id", 2], ["name", "Burger House"], ["description", "Os melhores hamburguers artesanais da cidade! Ingredientes frescos e selecionados."], ["address", "Av. dos Hamburguers, 456"], ["city", "Taquara"], ["state", "RS"], ["zip_code", "95600-001"], ["phone", "(51) 98888-8888"], ["delivery_time", "30-45 min"], ["delivery_fee", 5.99], ["minimum_order", 15.0], ["rating", 4.8], ["active", 1], ["created_at", "2025-08-06 23:12:40.938826"], ["updated_at", "2025-08-06 23:12:40.938826"]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mRestaurant Create (4.0ms)[0m  [1m[32mINSERT INTO "restaurants" ("user_id", "name", "description", "address", "city", "state", "zip_code", "phone", "delivery_time", "delivery_fee", "minimum_order", "rating", "active", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["user_id", 3], ["name", "Pizzaria Italiana"], ["description", "Pizzas autênticas com receitas tradicionais italianas. Massa fina e ingredientes importados."], ["address", "Rua das Pizzas, 789"], ["city", "Taquara"], ["state", "RS"], ["zip_code", "95600-002"], ["phone", "(51) 97777-7777"], ["delivery_time", "25-40 min"], ["delivery_fee", 4.99], ["minimum_order", 20.0], ["rating", 4.9], ["active", 1], ["created_at", "2025-08-06 23:12:40.950598"], ["updated_at", "2025-08-06 23:12:40.950598"]]
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mRestaurant Create (4.3ms)[0m  [1m[32mINSERT INTO "restaurants" ("user_id", "name", "description", "address", "city", "state", "zip_code", "phone", "delivery_time", "delivery_fee", "minimum_order", "rating", "active", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["user_id", 2], ["name", "Sabores da Casa"], ["description", "Comida caseira fresquinha todos os dias. Tempero da vovó e carinho em cada prato."], ["address", "Rua da Tradição, 147"], ["city", "Taquara"], ["state", "RS"], ["zip_code", "95600-004"], ["phone", "(51) 95555-5555"], ["delivery_time", "40-60 min"], ["delivery_fee", 6.5], ["minimum_order", 18.0], ["rating", 4.7], ["active", 1], ["created_at", "2025-08-06 23:12:40.963212"], ["updated_at", "2025-08-06 23:12:40.963212"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mRestaurantCategory Create (0.3ms)[0m  [1m[32mINSERT INTO "restaurant_categories" ("restaurant_id", "category_id", "created_at", "updated_at") VALUES (?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 1], ["category_id", 1], ["created_at", "2025-08-06 23:12:41.021374"], ["updated_at", "2025-08-06 23:12:41.021374"]]
+  [1m[36mRestaurantCategory Create (0.2ms)[0m  [1m[32mINSERT INTO "restaurant_categories" ("restaurant_id", "category_id", "created_at", "updated_at") VALUES (?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 1], ["category_id", 8], ["created_at", "2025-08-06 23:12:41.027032"], ["updated_at", "2025-08-06 23:12:41.027032"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mRestaurantCategory Create (3.7ms)[0m  [1m[32mINSERT INTO "restaurant_categories" ("restaurant_id", "category_id", "created_at", "updated_at") VALUES (?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 2], ["category_id", 2], ["created_at", "2025-08-06 23:12:41.035986"], ["updated_at", "2025-08-06 23:12:41.035986"]]
+  [1m[36mRestaurantCategory Create (0.2ms)[0m  [1m[32mINSERT INTO "restaurant_categories" ("restaurant_id", "category_id", "created_at", "updated_at") VALUES (?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 2], ["category_id", 5], ["created_at", "2025-08-06 23:12:41.045149"], ["updated_at", "2025-08-06 23:12:41.045149"]]
+  [1m[36mRestaurantCategory Create (0.2ms)[0m  [1m[32mINSERT INTO "restaurant_categories" ("restaurant_id", "category_id", "created_at", "updated_at") VALUES (?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 2], ["category_id", 7], ["created_at", "2025-08-06 23:12:41.050046"], ["updated_at", "2025-08-06 23:12:41.050046"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mRestaurantCategory Create (3.2ms)[0m  [1m[32mINSERT INTO "restaurant_categories" ("restaurant_id", "category_id", "created_at", "updated_at") VALUES (?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 3], ["category_id", 3], ["created_at", "2025-08-06 23:12:41.070839"], ["updated_at", "2025-08-06 23:12:41.070839"]]
+  [1m[36mRestaurantCategory Create (0.2ms)[0m  [1m[32mINSERT INTO "restaurant_categories" ("restaurant_id", "category_id", "created_at", "updated_at") VALUES (?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 3], ["category_id", 7], ["created_at", "2025-08-06 23:12:41.079185"], ["updated_at", "2025-08-06 23:12:41.079185"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mFood Create (3.9ms)[0m  [1m[32mINSERT INTO "foods" ("restaurant_id", "category_id", "name", "description", "price", "available", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 1], ["category_id", 1], ["name", "X-Bacon Artesanal"], ["description", "Hambúrguer artesanal 180g, bacon crocante, queijo cheddar, alface, tomate e molho especial"], ["price", 24.9], ["available", 1], ["created_at", "2025-08-06 23:12:41.093217"], ["updated_at", "2025-08-06 23:12:41.093217"]]
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mFood Create (2.7ms)[0m  [1m[32mINSERT INTO "foods" ("restaurant_id", "category_id", "name", "description", "price", "available", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 1], ["category_id", 1], ["name", "Burger Duplo"], ["description", "Dois hambúrgueres artesanais 120g cada, queijo, picles, cebola e molho barbecue"], ["price", 32.9], ["available", 1], ["created_at", "2025-08-06 23:12:41.104617"], ["updated_at", "2025-08-06 23:12:41.104617"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mFood Create (2.8ms)[0m  [1m[32mINSERT INTO "foods" ("restaurant_id", "category_id", "name", "description", "price", "available", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 1], ["category_id", 1], ["name", "Chicken Burger"], ["description", "Peito de frango grelhado, queijo, alface, tomate e maionese temperada"], ["price", 21.9], ["available", 1], ["created_at", "2025-08-06 23:12:41.113349"], ["updated_at", "2025-08-06 23:12:41.113349"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mFood Create (2.8ms)[0m  [1m[32mINSERT INTO "foods" ("restaurant_id", "category_id", "name", "description", "price", "available", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 1], ["category_id", 8], ["name", "Coca-Cola 350ml"], ["description", "Refrigerante Coca-Cola gelado"], ["price", 4.5], ["available", 1], ["created_at", "2025-08-06 23:12:41.121886"], ["updated_at", "2025-08-06 23:12:41.121886"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mFood Create (3.7ms)[0m  [1m[32mINSERT INTO "foods" ("restaurant_id", "category_id", "name", "description", "price", "available", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 2], ["category_id", 2], ["name", "Pizza Margherita"], ["description", "Molho de tomate, mussarela, manjericão fresco e azeite extra virgem"], ["price", 35.9], ["available", 1], ["created_at", "2025-08-06 23:12:41.132041"], ["updated_at", "2025-08-06 23:12:41.132041"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mFood Create (3.6ms)[0m  [1m[32mINSERT INTO "foods" ("restaurant_id", "category_id", "name", "description", "price", "available", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 2], ["category_id", 2], ["name", "Pizza Pepperoni"], ["description", "Molho de tomate, mussarela e pepperoni importado"], ["price", 39.9], ["available", 1], ["created_at", "2025-08-06 23:12:41.140908"], ["updated_at", "2025-08-06 23:12:41.140908"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mFood Create (2.5ms)[0m  [1m[32mINSERT INTO "foods" ("restaurant_id", "category_id", "name", "description", "price", "available", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 2], ["category_id", 5], ["name", "Lasanha Bolonhesa"], ["description", "Lasanha tradicional com molho bolonhesa e queijos especiais"], ["price", 28.9], ["available", 1], ["created_at", "2025-08-06 23:12:41.149983"], ["updated_at", "2025-08-06 23:12:41.149983"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mFood Create (3.3ms)[0m  [1m[32mINSERT INTO "foods" ("restaurant_id", "category_id", "name", "description", "price", "available", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 2], ["category_id", 7], ["name", "Tiramisu"], ["description", "Sobremesa italiana tradicional com café e mascarpone"], ["price", 12.9], ["available", 1], ["created_at", "2025-08-06 23:12:41.157022"], ["updated_at", "2025-08-06 23:12:41.157022"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mFood Create (3.5ms)[0m  [1m[32mINSERT INTO "foods" ("restaurant_id", "category_id", "name", "description", "price", "available", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 3], ["category_id", 3], ["name", "Feijoada Completa"], ["description", "Feijoada tradicional com acompanhamentos: arroz, farofa, couve e laranja"], ["price", 26.9], ["available", 1], ["created_at", "2025-08-06 23:12:41.165785"], ["updated_at", "2025-08-06 23:12:41.165785"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mFood Create (3.2ms)[0m  [1m[32mINSERT INTO "foods" ("restaurant_id", "category_id", "name", "description", "price", "available", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 3], ["category_id", 3], ["name", "Bife à Parmegiana"], ["description", "Bife empanado com molho de tomate, queijo e acompanha arroz e batata frita"], ["price", 23.9], ["available", 1], ["created_at", "2025-08-06 23:12:41.174446"], ["updated_at", "2025-08-06 23:12:41.174446"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mFood Create (3.3ms)[0m  [1m[32mINSERT INTO "foods" ("restaurant_id", "category_id", "name", "description", "price", "available", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 3], ["category_id", 3], ["name", "Escondidinho de Carne Seca"], ["description", "Carne seca desfiada, purê de mandioca e queijo gratinado"], ["price", 22.9], ["available", 1], ["created_at", "2025-08-06 23:12:41.182603"], ["updated_at", "2025-08-06 23:12:41.182603"]]
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mFood Create (2.8ms)[0m  [1m[32mINSERT INTO "foods" ("restaurant_id", "category_id", "name", "description", "price", "available", "created_at", "updated_at") VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["restaurant_id", 3], ["category_id", 7], ["name", "Pudim Caseiro"], ["description", "Pudim de leite condensado feito na casa, receita da vovó"], ["price", 8.9], ["available", 1], ["created_at", "2025-08-06 23:12:41.191108"], ["updated_at", "2025-08-06 23:12:41.191108"]]
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mCategory Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "categories"[0m
+  [1m[36mRestaurant Count (0.3ms)[0m  [1m[34mSELECT COUNT(*) FROM "restaurants"[0m
+  [1m[36mFood Count (0.1ms)[0m  [1m[34mSELECT COUNT(*) FROM "foods"[0m
+Started GET "/api/v1/restaurants" for ::1 at 2025-08-06 20:25:02 -0300
+  [1m[36mActiveRecord::SchemaMigration Load (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Processing by Api::V1::RestaurantsController#index as HTML
+  [1m[36mRestaurant Load (0.2ms)[0m  [1m[34mSELECT "restaurants".* FROM "restaurants" WHERE "restaurants"."active" = ? LIMIT ? OFFSET ?[0m  [["active", 1], ["LIMIT", 10], ["OFFSET", 0]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+  [1m[36mRestaurantCategory Load (0.2ms)[0m  [1m[34mSELECT "restaurant_categories".* FROM "restaurant_categories" WHERE "restaurant_categories"."restaurant_id" IN (?, ?, ?)[0m  [["restaurant_id", 1], ["restaurant_id", 2], ["restaurant_id", 3]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+  [1m[36mCategory Load (0.2ms)[0m  [1m[34mSELECT "categories".* FROM "categories" WHERE "categories"."id" IN (?, ?, ?, ?, ?, ?)[0m  [["id", 1], ["id", 8], ["id", 2], ["id", 5], ["id", 7], ["id", 3]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+DEPRECATION WARNING: Defining enums with keyword arguments is deprecated and will be removed
+in Rails 8.0. Positional arguments should be used instead:
+
+enum :status, {pending: 0, confirmed: 1, preparing: 2, ready: 3, delivering: 4, delivered: 5, cancelled: 6}
+ (called from <class:Order> at C:/Delivery/delivx/backend/app/models/order.rb:10)
+  [1m[36mOrder Average (0.2ms)[0m  [1m[34mSELECT AVG("orders"."rating") FROM "orders" WHERE "orders"."restaurant_id" = ? AND "orders"."rating" IS NOT NULL[0m  [["restaurant_id", 1]]
+  ↳ app/models/restaurant.rb:22:in 'Restaurant#average_rating'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 1], ["record_type", "Restaurant"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:80:in 'Api::V1::RestaurantsController#restaurant_json'
+  [1m[36mOrder Average (0.1ms)[0m  [1m[34mSELECT AVG("orders"."rating") FROM "orders" WHERE "orders"."restaurant_id" = ? AND "orders"."rating" IS NOT NULL[0m  [["restaurant_id", 2]]
+  ↳ app/models/restaurant.rb:22:in 'Restaurant#average_rating'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 2], ["record_type", "Restaurant"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:80:in 'Api::V1::RestaurantsController#restaurant_json'
+  [1m[36mOrder Average (0.1ms)[0m  [1m[34mSELECT AVG("orders"."rating") FROM "orders" WHERE "orders"."restaurant_id" = ? AND "orders"."rating" IS NOT NULL[0m  [["restaurant_id", 3]]
+  ↳ app/models/restaurant.rb:22:in 'Restaurant#average_rating'
+  [1m[36mActiveStorage::Attachment Load (0.2ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 3], ["record_type", "Restaurant"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:80:in 'Api::V1::RestaurantsController#restaurant_json'
+Completed 200 OK in 208ms (Views: 0.4ms | ActiveRecord: 7.5ms (9 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/api/v1/restaurants" for ::1 at 2025-08-06 20:25:11 -0300
+Processing by Api::V1::RestaurantsController#index as HTML
+  [1m[36mRestaurant Load (0.2ms)[0m  [1m[34mSELECT "restaurants".* FROM "restaurants" WHERE "restaurants"."active" = ? LIMIT ? OFFSET ?[0m  [["active", 1], ["LIMIT", 10], ["OFFSET", 0]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+  [1m[36mRestaurantCategory Load (0.3ms)[0m  [1m[34mSELECT "restaurant_categories".* FROM "restaurant_categories" WHERE "restaurant_categories"."restaurant_id" IN (?, ?, ?)[0m  [["restaurant_id", 1], ["restaurant_id", 2], ["restaurant_id", 3]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+  [1m[36mCategory Load (0.4ms)[0m  [1m[34mSELECT "categories".* FROM "categories" WHERE "categories"."id" IN (?, ?, ?, ?, ?, ?)[0m  [["id", 1], ["id", 8], ["id", 2], ["id", 5], ["id", 7], ["id", 3]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+  [1m[36mOrder Average (0.1ms)[0m  [1m[34mSELECT AVG("orders"."rating") FROM "orders" WHERE "orders"."restaurant_id" = ? AND "orders"."rating" IS NOT NULL[0m  [["restaurant_id", 1]]
+  ↳ app/models/restaurant.rb:22:in 'Restaurant#average_rating'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 1], ["record_type", "Restaurant"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:80:in 'Api::V1::RestaurantsController#restaurant_json'
+  [1m[36mOrder Average (0.1ms)[0m  [1m[34mSELECT AVG("orders"."rating") FROM "orders" WHERE "orders"."restaurant_id" = ? AND "orders"."rating" IS NOT NULL[0m  [["restaurant_id", 2]]
+  ↳ app/models/restaurant.rb:22:in 'Restaurant#average_rating'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 2], ["record_type", "Restaurant"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:80:in 'Api::V1::RestaurantsController#restaurant_json'
+  [1m[36mOrder Average (0.1ms)[0m  [1m[34mSELECT AVG("orders"."rating") FROM "orders" WHERE "orders"."restaurant_id" = ? AND "orders"."rating" IS NOT NULL[0m  [["restaurant_id", 3]]
+  ↳ app/models/restaurant.rb:22:in 'Restaurant#average_rating'
+  [1m[36mActiveStorage::Attachment Load (0.2ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 3], ["record_type", "Restaurant"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:80:in 'Api::V1::RestaurantsController#restaurant_json'
+Completed 200 OK in 22ms (Views: 0.2ms | ActiveRecord: 1.4ms (9 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/api/v1/foods" for ::1 at 2025-08-06 20:25:25 -0300
+Processing by Api::V1::FoodsController#index as HTML
+  [1m[36mFood Load (0.2ms)[0m  [1m[34mSELECT "foods".* FROM "foods" WHERE "foods"."available" = ? LIMIT ? OFFSET ?[0m  [["available", 1], ["LIMIT", 12], ["OFFSET", 0]]
+  ↳ app/controllers/api/v1/foods_controller.rb:19:in 'Enumerable#map'
+  [1m[36mRestaurant Load (0.2ms)[0m  [1m[34mSELECT "restaurants".* FROM "restaurants" WHERE "restaurants"."id" IN (?, ?, ?)[0m  [["id", 1], ["id", 2], ["id", 3]]
+  ↳ app/controllers/api/v1/foods_controller.rb:19:in 'Enumerable#map'
+  [1m[36mCategory Load (0.2ms)[0m  [1m[34mSELECT "categories".* FROM "categories" WHERE "categories"."id" IN (?, ?, ?, ?, ?, ?)[0m  [["id", 1], ["id", 8], ["id", 2], ["id", 5], ["id", 7], ["id", 3]]
+  ↳ app/controllers/api/v1/foods_controller.rb:19:in 'Enumerable#map'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 1], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.2ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 2], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 3], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 4], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 5], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 6], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 7], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 8], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.3ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 9], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 10], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 11], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 12], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mFood Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "foods" WHERE "foods"."available" = ?[0m  [["available", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:22:in 'Api::V1::FoodsController#index'
+Completed 200 OK in 52ms (Views: 0.5ms | ActiveRecord: 3.1ms (16 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/api/v1/foods" for ::1 at 2025-08-06 20:26:38 -0300
+Processing by Api::V1::FoodsController#index as JSON
+  Parameters: {"food" => {}}
+  [1m[36mFood Load (0.2ms)[0m  [1m[34mSELECT "foods".* FROM "foods" WHERE "foods"."available" = ? LIMIT ? OFFSET ?[0m  [["available", 1], ["LIMIT", 12], ["OFFSET", 0]]
+  ↳ app/controllers/api/v1/foods_controller.rb:19:in 'Enumerable#map'
+  [1m[36mRestaurant Load (0.3ms)[0m  [1m[34mSELECT "restaurants".* FROM "restaurants" WHERE "restaurants"."id" IN (?, ?, ?)[0m  [["id", 1], ["id", 2], ["id", 3]]
+  ↳ app/controllers/api/v1/foods_controller.rb:19:in 'Enumerable#map'
+  [1m[36mCategory Load (0.4ms)[0m  [1m[34mSELECT "categories".* FROM "categories" WHERE "categories"."id" IN (?, ?, ?, ?, ?, ?)[0m  [["id", 1], ["id", 8], ["id", 2], ["id", 5], ["id", 7], ["id", 3]]
+  ↳ app/controllers/api/v1/foods_controller.rb:19:in 'Enumerable#map'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 1], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.2ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 2], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 3], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 4], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 5], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 6], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.2ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 7], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 8], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 9], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.2ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 10], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.2ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 11], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mActiveStorage::Attachment Load (0.2ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 12], ["record_type", "Food"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:85:in 'Api::V1::FoodsController#food_json'
+  [1m[36mFood Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "foods" WHERE "foods"."available" = ?[0m  [["available", 1]]
+  ↳ app/controllers/api/v1/foods_controller.rb:22:in 'Api::V1::FoodsController#index'
+Completed 200 OK in 75ms (Views: 1.4ms | ActiveRecord: 2.7ms (16 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/api/v1/categories" for ::1 at 2025-08-06 20:26:38 -0300
+Started GET "/api/v1/restaurants" for ::1 at 2025-08-06 20:26:38 -0300
+  
+ActionController::RoutingError (uninitialized constant Api::V1::CategoriesController):
+
+Causes:
+ActionDispatch::MissingController (uninitialized constant Api::V1::CategoriesController)
+NameError (uninitialized constant Api::V1::CategoriesController)
+  
+Processing by Api::V1::RestaurantsController#index as JSON
+  Parameters: {"restaurant" => {}}
+  [1m[36mRestaurant Load (0.2ms)[0m  [1m[34mSELECT "restaurants".* FROM "restaurants" WHERE "restaurants"."active" = ? LIMIT ? OFFSET ?[0m  [["active", 1], ["LIMIT", 10], ["OFFSET", 0]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+  [1m[36mRestaurantCategory Load (0.3ms)[0m  [1m[34mSELECT "restaurant_categories".* FROM "restaurant_categories" WHERE "restaurant_categories"."restaurant_id" IN (?, ?, ?)[0m  [["restaurant_id", 1], ["restaurant_id", 2], ["restaurant_id", 3]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+  [1m[36mCategory Load (0.2ms)[0m  [1m[34mSELECT "categories".* FROM "categories" WHERE "categories"."id" IN (?, ?, ?, ?, ?, ?)[0m  [["id", 1], ["id", 8], ["id", 2], ["id", 5], ["id", 7], ["id", 3]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+  [1m[36mOrder Average (0.1ms)[0m  [1m[34mSELECT AVG("orders"."rating") FROM "orders" WHERE "orders"."restaurant_id" = ? AND "orders"."rating" IS NOT NULL[0m  [["restaurant_id", 1]]
+  ↳ app/models/restaurant.rb:22:in 'Restaurant#average_rating'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 1], ["record_type", "Restaurant"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:80:in 'Api::V1::RestaurantsController#restaurant_json'
+  [1m[36mOrder Average (0.2ms)[0m  [1m[34mSELECT AVG("orders"."rating") FROM "orders" WHERE "orders"."restaurant_id" = ? AND "orders"."rating" IS NOT NULL[0m  [["restaurant_id", 2]]
+  ↳ app/models/restaurant.rb:22:in 'Restaurant#average_rating'
+  [1m[36mActiveStorage::Attachment Load (0.2ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 2], ["record_type", "Restaurant"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:80:in 'Api::V1::RestaurantsController#restaurant_json'
+  [1m[36mOrder Average (0.1ms)[0m  [1m[34mSELECT AVG("orders"."rating") FROM "orders" WHERE "orders"."restaurant_id" = ? AND "orders"."rating" IS NOT NULL[0m  [["restaurant_id", 3]]
+  ↳ app/models/restaurant.rb:22:in 'Restaurant#average_rating'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 3], ["record_type", "Restaurant"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:80:in 'Api::V1::RestaurantsController#restaurant_json'
+Completed 200 OK in 25ms (Views: 0.2ms | ActiveRecord: 1.4ms (9 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/api/v1/restaurants" for ::1 at 2025-08-06 20:26:43 -0300
+Processing by Api::V1::RestaurantsController#index as JSON
+  Parameters: {"restaurant" => {}}
+  [1m[36mRestaurant Load (0.2ms)[0m  [1m[34mSELECT "restaurants".* FROM "restaurants" WHERE "restaurants"."active" = ? LIMIT ? OFFSET ?[0m  [["active", 1], ["LIMIT", 10], ["OFFSET", 0]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+  [1m[36mRestaurantCategory Load (0.2ms)[0m  [1m[34mSELECT "restaurant_categories".* FROM "restaurant_categories" WHERE "restaurant_categories"."restaurant_id" IN (?, ?, ?)[0m  [["restaurant_id", 1], ["restaurant_id", 2], ["restaurant_id", 3]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+  [1m[36mCategory Load (0.6ms)[0m  [1m[34mSELECT "categories".* FROM "categories" WHERE "categories"."id" IN (?, ?, ?, ?, ?, ?)[0m  [["id", 1], ["id", 8], ["id", 2], ["id", 5], ["id", 7], ["id", 3]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+  [1m[36mOrder Average (0.2ms)[0m  [1m[34mSELECT AVG("orders"."rating") FROM "orders" WHERE "orders"."restaurant_id" = ? AND "orders"."rating" IS NOT NULL[0m  [["restaurant_id", 1]]
+  ↳ app/models/restaurant.rb:22:in 'Restaurant#average_rating'
+  [1m[36mActiveStorage::Attachment Load (0.2ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 1], ["record_type", "Restaurant"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:80:in 'Api::V1::RestaurantsController#restaurant_json'
+  [1m[36mOrder Average (0.1ms)[0m  [1m[34mSELECT AVG("orders"."rating") FROM "orders" WHERE "orders"."restaurant_id" = ? AND "orders"."rating" IS NOT NULL[0m  [["restaurant_id", 2]]
+  ↳ app/models/restaurant.rb:22:in 'Restaurant#average_rating'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 2], ["record_type", "Restaurant"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:80:in 'Api::V1::RestaurantsController#restaurant_json'
+  [1m[36mOrder Average (0.1ms)[0m  [1m[34mSELECT AVG("orders"."rating") FROM "orders" WHERE "orders"."restaurant_id" = ? AND "orders"."rating" IS NOT NULL[0m  [["restaurant_id", 3]]
+  ↳ app/models/restaurant.rb:22:in 'Restaurant#average_rating'
+  [1m[36mActiveStorage::Attachment Load (0.2ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 3], ["record_type", "Restaurant"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:80:in 'Api::V1::RestaurantsController#restaurant_json'
+Completed 200 OK in 35ms (Views: 0.3ms | ActiveRecord: 1.8ms (9 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/api/v1/restaurants?search=Sad" for ::1 at 2025-08-06 20:26:44 -0300
+Processing by Api::V1::RestaurantsController#index as JSON
+  Parameters: {"search" => "Sad", "restaurant" => {}}
+  [1m[36mRestaurant Load (0.4ms)[0m  [1m[34mSELECT "restaurants".* FROM "restaurants" WHERE "restaurants"."active" = ? AND (name ILIKE ?) LIMIT ? OFFSET ?[0m  [["active", 1], [nil, "%Sad%"], ["LIMIT", 10], ["OFFSET", 0]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+Completed 500 Internal Server Error in 4ms (ActiveRecord: 0.4ms (1 query, 0 cached) | GC: 0.0ms)
+
+
+  
+ActiveRecord::StatementInvalid (SQLite3::SQLException: near "ILIKE": syntax error):
+
+Causes:
+SQLite3::SQLException (near "ILIKE": syntax error)
+  
+Started GET "/api/v1/restaurants?search=Sad" for ::1 at 2025-08-06 20:26:44 -0300
+Processing by Api::V1::RestaurantsController#index as JSON
+  Parameters: {"search" => "Sad", "restaurant" => {}}
+  [1m[36mRestaurant Load (0.3ms)[0m  [1m[34mSELECT "restaurants".* FROM "restaurants" WHERE "restaurants"."active" = ? AND (name ILIKE ?) LIMIT ? OFFSET ?[0m  [["active", 1], [nil, "%Sad%"], ["LIMIT", 10], ["OFFSET", 0]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+Completed 500 Internal Server Error in 3ms (ActiveRecord: 0.3ms (1 query, 0 cached) | GC: 0.0ms)
+
+
+  
+ActiveRecord::StatementInvalid (SQLite3::SQLException: near "ILIKE": syntax error):
+
+Causes:
+SQLite3::SQLException (near "ILIKE": syntax error)
+  
+Started GET "/api/v1/restaurants" for ::1 at 2025-08-06 20:26:57 -0300
+Processing by Api::V1::RestaurantsController#index as JSON
+  Parameters: {"restaurant" => {}}
+  [1m[36mRestaurant Load (0.2ms)[0m  [1m[34mSELECT "restaurants".* FROM "restaurants" WHERE "restaurants"."active" = ? LIMIT ? OFFSET ?[0m  [["active", 1], ["LIMIT", 10], ["OFFSET", 0]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+  [1m[36mRestaurantCategory Load (0.5ms)[0m  [1m[34mSELECT "restaurant_categories".* FROM "restaurant_categories" WHERE "restaurant_categories"."restaurant_id" IN (?, ?, ?)[0m  [["restaurant_id", 1], ["restaurant_id", 2], ["restaurant_id", 3]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+  [1m[36mCategory Load (0.3ms)[0m  [1m[34mSELECT "categories".* FROM "categories" WHERE "categories"."id" IN (?, ?, ?, ?, ?, ?)[0m  [["id", 1], ["id", 8], ["id", 2], ["id", 5], ["id", 7], ["id", 3]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:13:in 'Enumerable#map'
+  [1m[36mOrder Average (0.1ms)[0m  [1m[34mSELECT AVG("orders"."rating") FROM "orders" WHERE "orders"."restaurant_id" = ? AND "orders"."rating" IS NOT NULL[0m  [["restaurant_id", 1]]
+  ↳ app/models/restaurant.rb:22:in 'Restaurant#average_rating'
+  [1m[36mActiveStorage::Attachment Load (0.2ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 1], ["record_type", "Restaurant"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:80:in 'Api::V1::RestaurantsController#restaurant_json'
+  [1m[36mOrder Average (0.1ms)[0m  [1m[34mSELECT AVG("orders"."rating") FROM "orders" WHERE "orders"."restaurant_id" = ? AND "orders"."rating" IS NOT NULL[0m  [["restaurant_id", 2]]
+  ↳ app/models/restaurant.rb:22:in 'Restaurant#average_rating'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 2], ["record_type", "Restaurant"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:80:in 'Api::V1::RestaurantsController#restaurant_json'
+  [1m[36mOrder Average (0.1ms)[0m  [1m[34mSELECT AVG("orders"."rating") FROM "orders" WHERE "orders"."restaurant_id" = ? AND "orders"."rating" IS NOT NULL[0m  [["restaurant_id", 3]]
+  ↳ app/models/restaurant.rb:22:in 'Restaurant#average_rating'
+  [1m[36mActiveStorage::Attachment Load (0.1ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 3], ["record_type", "Restaurant"], ["name", "image"], ["LIMIT", 1]]
+  ↳ app/controllers/api/v1/restaurants_controller.rb:80:in 'Api::V1::RestaurantsController#restaurant_json'
+Completed 200 OK in 29ms (Views: 0.3ms | ActiveRecord: 1.7ms (9 queries, 0 cached) | GC: 0.0ms)
+
+
